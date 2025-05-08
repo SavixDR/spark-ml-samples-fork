@@ -29,4 +29,6 @@ dependencies {
 
     testCompile("org.springframework:spring-test:$springFrameworkVersion")
     testCompile("junit:junit:$junitVersion")
+
+    implementation("org.xerial.snappy:snappy-java:1.1.10.7")
 }
