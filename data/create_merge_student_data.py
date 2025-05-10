@@ -19,20 +19,20 @@ spotify_client = spotipy.Spotify(
 
 genius_client = lyricsgenius.Genius(GENIUS_CLIENT_ACCESS_TOKEN, timeout=40)
 
-# Containers for electro genre
-electro_artists = []
-electro_tracks = []
-electro_years = []
-electro_genres = []
-electro_lyrics = []
+# Containers for classic genre
+classic_artists = []
+classic_tracks = []
+classic_years = []
+classic_genres = []
+classic_lyrics = []
 
 i = 1
 
-# Fetch Electro tracks from Spotify
-for offset in range(0, 200, 50):
-    electro_results = spotify_client.search(q="genre:electro", type="track", limit=50, offset=offset)
+# Fetch classic tracks from Spotify
+for offset in range(0, 500, 50):
+    classic_results = spotify_client.search(q="genre:classic", type="track", limit=50, offset=offset)
 
-    for track in electro_results["tracks"]["items"]:
+    for track in classic_results["tracks"]["items"]:
         try:
             print(f"Processing {i}: {track['name']} by {track['artists'][0]['name']}")
             i += 1
@@ -45,46 +45,46 @@ for offset in range(0, 200, 50):
             lyrics_text = re.sub(r"^.*?\n+", "", lyrics_text, count=1)
             lyrics_text = re.sub(r"\s+", " ", lyrics_text)
 
-            electro_artists.append(track["artists"][0]["name"])
-            electro_tracks.append(track["name"])
-            electro_years.append(track["album"]["release_date"])
-            electro_genres.append("electro")
-            electro_lyrics.append(lyrics_text)
+            classic_artists.append(track["artists"][0]["name"])
+            classic_tracks.append(track["name"])
+            classic_years.append(track["album"]["release_date"])
+            classic_genres.append("classic")
+            classic_lyrics.append(lyrics_text)
 
         except Exception as e:
             print(f"Error: {e}")
             continue
 
 # Create DataFrame
-electro_df = pd.DataFrame({
-    "artist_name": electro_artists,
-    "track_name": electro_tracks,
-    "release_date": electro_years,
-    "genre": electro_genres,
-    "lyrics": electro_lyrics
+classic_df = pd.DataFrame({
+    "artist_name": classic_artists,
+    "track_name": classic_tracks,
+    "release_date": classic_years,
+    "genre": classic_genres,
+    "lyrics": classic_lyrics
 })
 
 # Format and clean data
-electro_df["release_date"] = pd.to_datetime(electro_df["release_date"], errors="coerce")
-electro_df.dropna(subset=["release_date"], inplace=True)
-electro_df["release_date"] = electro_df["release_date"].dt.year.astype("int64")
-electro_df.dropna(subset=["lyrics"], inplace=True)
-electro_df.drop_duplicates(subset=["lyrics", "track_name"], inplace=True)
-electro_df["lyrics"] = electro_df["lyrics"].apply(lambda x: re.sub(r"[^\x00-\x7F]+", "", x))
-electro_df["lyrics"] = electro_df["lyrics"].str.replace(r"\[.*?\]", "", regex=True)
+classic_df["release_date"] = pd.to_datetime(classic_df["release_date"], errors="coerce")
+classic_df.dropna(subset=["release_date"], inplace=True)
+classic_df["release_date"] = classic_df["release_date"].dt.year.astype("int64")
+classic_df.dropna(subset=["lyrics"], inplace=True)
+classic_df.drop_duplicates(subset=["lyrics", "track_name"], inplace=True)
+classic_df["lyrics"] = classic_df["lyrics"].apply(lambda x: re.sub(r"[^\x00-\x7F]+", "", x))
+classic_df["lyrics"] = classic_df["lyrics"].str.replace(r"\[.*?\]", "", regex=True)
 
-# Save electro dataset
-electro_df.to_csv("./Student_dataset.csv", index=False)
+# Save classic dataset
+classic_df.to_csv("data/Student_dataset.csv", index=False)
 
-electro_df = pd.read_csv("data/Student_dataset.csv")
+classic_df = pd.read_csv("data/Student_dataset.csv")
 
 # Merge with Mendeley dataset
 mendeley_df = pd.read_csv("data/Mendeley_dataset.csv")
 mendeley_df = mendeley_df[["artist_name", "track_name", "release_date", "genre", "lyrics"]]
-merged_df = pd.concat([mendeley_df, electro_df], ignore_index=True)
+merged_df = pd.concat([mendeley_df, classic_df], ignore_index=True)
 
 # Save merged dataset
-merged_df.to_csv("Merged_dataset.csv", index=False)
+merged_df.to_csv("data/Merged_dataset.csv", index=False)
 
-print("✅ Electro lyrics fetched and merged successfully.")
+print("✅ classic lyrics fetched and merged successfully.")
 

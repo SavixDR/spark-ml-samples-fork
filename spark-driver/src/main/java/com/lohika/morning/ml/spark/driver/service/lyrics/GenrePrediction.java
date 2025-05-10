@@ -10,7 +10,7 @@ public class GenrePrediction {
     private Double reggaeProbability;
     private Double rockProbability;
     private Double hipHopProbability;
-    private Double electroProbability;
+    private Double classicProbability;
 
     // Constructor matching the CommonLyricsPipeline call
     public GenrePrediction(String genre,
@@ -21,7 +21,7 @@ public class GenrePrediction {
                            Double reggaeProbability,
                            Double rockProbability,
                            Double hipHopProbability,
-                           Double electroProbability) {
+                           Double classicProbability) {
         this.genre = genre;
         this.popProbability = popProbability;
         this.countryProbability = countryProbability;
@@ -30,7 +30,7 @@ public class GenrePrediction {
         this.reggaeProbability = reggaeProbability;
         this.rockProbability = rockProbability;
         this.hipHopProbability = hipHopProbability;
-        this.electroProbability = electroProbability;
+        this.classicProbability = classicProbability;
     }
 
     // Optional: single-arg constructor for fallback case
@@ -75,7 +75,7 @@ public class GenrePrediction {
         return hipHopProbability;
     }
 
-    public Double getElectroProbability() {
-        return electroProbability;
+    public Double getClassicProbability() {
+        return classicProbability;
     }
 }

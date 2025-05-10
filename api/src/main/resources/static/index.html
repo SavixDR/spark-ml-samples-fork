@@ -72,11 +72,11 @@
 				"Reggae",
 				"Rock",
 				"Hip Hop",
-				"Electro",
+				"Classical",
 			];
 
-      let genreChart = null;
-      window.genreChart = genreChart;
+			let genreChart = null;
+			window.genreChart = genreChart;
 
 			async function classifyLyrics() {
 				const lyrics = document.getElementById("lyrics").value.trim();
@@ -102,14 +102,14 @@
 				// Extract genre and probability values
 				const predictedGenre = result.genre;
 				const probabilities = [
-          result.popProbability,
+					result.popProbability,
 					result.countryProbability,
 					result.bluesProbability,
 					result.jazzProbability,
 					result.reggaeProbability,
 					result.rockProbability,
 					result.hipHopProbability,
-					result.electroProbability,
+					result.classicProbability,
 				];
 
 				document.getElementById(

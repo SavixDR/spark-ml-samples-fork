@@ -16,7 +16,7 @@ public enum Genre {
         
     HIP_HOP("Hip Hop", 6D),
 
-    ELECTRO("Electro", 7D),
+    CLASSIC("Classic", 7D),
 
     UNKNOWN("Unknown", -1D);
 
