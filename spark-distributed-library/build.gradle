@@ -41,3 +41,9 @@ configurations {
     // We don't want the Spark dependencies in our shadowJar.
     runtime.exclude group: 'org.apache.spark'
 }
+
+sourceSets.main.java {
+    exclude 'com/lohika/morning/ml/spark/distributed/library/function/map/dou/**'
+    
+}
+

@@ -36,4 +36,7 @@ dependencies {
 
     testCompile("junit:junit:$junitVersion")
     testCompile("org.springframework:spring-test:$springFrameworkVersion")
+
+    implementation "org.apache.spark:spark-mllib_$apacheSparkScalaVersion:$apacheSparkVersion"
+
 }

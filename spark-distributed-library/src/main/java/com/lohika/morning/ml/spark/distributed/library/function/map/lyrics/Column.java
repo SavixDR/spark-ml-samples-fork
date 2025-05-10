@@ -6,7 +6,7 @@ import org.apache.spark.sql.types.StructField;
 
 public enum Column {
 
-    VALUE("value", DataTypes.StringType),
+    VALUE("lyrics", DataTypes.StringType),
 
     CLEAN("clean", DataTypes.StringType),
 
@@ -17,6 +17,8 @@ public enum Column {
     WORDS("words", DataTypes.createArrayType(DataTypes.StringType)),
 
     LABEL("label", DataTypes.DoubleType),
+            
+    GENRE("genre", DataTypes.DoubleType),
 
     FILTERED_WORD("filteredWord", DataTypes.StringType),
 

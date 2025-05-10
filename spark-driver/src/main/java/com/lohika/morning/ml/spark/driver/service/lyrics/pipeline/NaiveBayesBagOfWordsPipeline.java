@@ -9,6 +9,7 @@ import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.ml.classification.NaiveBayes;
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator;
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.ml.feature.CountVectorizer;
 import org.apache.spark.ml.feature.CountVectorizerModel;
 import org.apache.spark.ml.feature.StopWordsRemover;
@@ -26,6 +27,13 @@ public class NaiveBayesBagOfWordsPipeline extends CommonLyricsPipeline {
     public CrossValidatorModel classify() {
         Dataset sentences = readLyrics();
 
+        System.out.println("Sentences count: " + sentences.count());
+        System.out.println("Sentences schema: " + sentences.schema().treeString());
+
+        System.out.println("Sentences sample: ");
+        sentences.show(5, false);
+        sentences.groupBy("label").count().show(false);
+
         // Remove all punctuation symbols.
         Cleanser cleanser = new Cleanser();
 
@@ -34,13 +42,13 @@ public class NaiveBayesBagOfWordsPipeline extends CommonLyricsPipeline {
 
         // Split into words.
         Tokenizer tokenizer = new Tokenizer()
-                .setInputCol(CLEAN.getName())
-                .setOutputCol(WORDS.getName());
+                        .setInputCol(CLEAN.getName())
+                        .setOutputCol(WORDS.getName());
 
         // Remove stop words.
         StopWordsRemover stopWordsRemover = new StopWordsRemover()
-                .setInputCol(WORDS.getName())
-                .setOutputCol(FILTERED_WORDS.getName());
+                        .setInputCol(WORDS.getName())
+                        .setOutputCol(FILTERED_WORDS.getName());
 
         // Create as many rows as words. This is needed or Stemmer.
         Exploder exploder = new Exploder();
@@ -51,58 +59,67 @@ public class NaiveBayesBagOfWordsPipeline extends CommonLyricsPipeline {
         Uniter uniter = new Uniter();
         Verser verser = new Verser();
 
-        CountVectorizer countVectorizer = new CountVectorizer().setInputCol(VERSE.getName()).setOutputCol("features");
+        CountVectorizer countVectorizer = new CountVectorizer().setInputCol(VERSE.getName())
+                        .setOutputCol("features");
 
         NaiveBayes naiveBayes = new NaiveBayes();
 
         Pipeline pipeline = new Pipeline().setStages(
-                new PipelineStage[]{
-                        cleanser,
-                        numerator,
-                        tokenizer,
-                        stopWordsRemover,
-                        exploder,
-                        stemmer,
-                        uniter,
-                        verser,
-                        countVectorizer,
-                        naiveBayes});
+                        new PipelineStage[] {
+                                        cleanser,
+                                        numerator,
+                                        tokenizer,
+                                        stopWordsRemover,
+                                        exploder,
+                                        stemmer,
+                                        uniter,
+                                        verser,
+                                        countVectorizer,
+                                        naiveBayes });
 
         // Use a ParamGridBuilder to construct a grid of parameters to search over.
         ParamMap[] paramGrid = new ParamGridBuilder()
-                .addGrid(verser.sentencesInVerse(), new int[]{4, 8, 16})
-                .build();
+                        .addGrid(verser.sentencesInVerse(), new int[] { 4, 8, 16 })
+                        .build();
 
         CrossValidator crossValidator = new CrossValidator()
-                .setEstimator(pipeline)
-                .setEvaluator(new BinaryClassificationEvaluator())
-                .setEstimatorParamMaps(paramGrid)
-                .setNumFolds(10);
-
+                        .setEstimator(pipeline)
+                        .setEvaluator(new MulticlassClassificationEvaluator()
+                                        .setLabelCol("label")
+                                        .setPredictionCol("prediction")
+                                        .setMetricName("accuracy"))
+                        .setEstimatorParamMaps(paramGrid)
+                        .setNumFolds(10);
+        
         // Run cross-validation, and choose the best set of parameters.
+        long start = System.currentTimeMillis();
         CrossValidatorModel model = crossValidator.fit(sentences);
+        long end = System.currentTimeMillis();
+
+        System.out.println("Training duration (ms): " + (end - start));
+
         saveModel(model, getModelDirectory());
 
         return model;
-    }
+        }
 
-    public Map<String, Object> getModelStatistics(CrossValidatorModel model) {
-        Map<String, Object> modelStatistics = super.getModelStatistics(model);
+        public Map<String, Object> getModelStatistics(CrossValidatorModel model) {
+                Map<String, Object> modelStatistics = super.getModelStatistics(model);
 
-        PipelineModel bestModel = (PipelineModel) model.bestModel();
-        Transformer[] stages = bestModel.stages();
+                PipelineModel bestModel = (PipelineModel) model.bestModel();
+                Transformer[] stages = bestModel.stages();
 
-        modelStatistics.put("Sentences in verse", ((Verser) stages[7]).getSentencesInVerse());
-        modelStatistics.put("Vocabulary", ((CountVectorizerModel) stages[8]).vocabulary().length);
+                modelStatistics.put("Sentences in verse", ((Verser) stages[7]).getSentencesInVerse());
+                modelStatistics.put("Vocabulary", ((CountVectorizerModel) stages[8]).vocabulary().length);
 
-        printModelStatistics(modelStatistics);
+                printModelStatistics(modelStatistics);
 
-        return modelStatistics;
-    }
+                return modelStatistics;
+        }
 
-    @Override
-    protected String getModelDirectory() {
-        return getLyricsModelDirectoryPath() + "/naive-bayes/";
-    }
+        @Override
+        protected String getModelDirectory() {
+                return getLyricsModelDirectoryPath() + "/naive-bayes/";
+        }
 
 }

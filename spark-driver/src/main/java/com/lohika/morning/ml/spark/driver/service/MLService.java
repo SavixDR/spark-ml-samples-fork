@@ -82,6 +82,10 @@ public class MLService {
 
     public <T extends MLWritable> void saveModel(T model, String modelOutputDirectory) {
         try {
+            // Disable permission setting on Windows (avoids chmod error)
+            sparkSession.sparkContext().hadoopConfiguration().set("dfs.permissions", "false");
+            sparkSession.sparkContext().hadoopConfiguration().set("spark.hadoop.fs.permissions.enabled", "false");
+
             model.write().overwrite().save(modelOutputDirectory);
 
             System.out.println("\n------------------------------------------------");

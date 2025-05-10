@@ -1,1 +1,1 @@
-{"class":"org.apache.spark.ml.evaluation.BinaryClassificationEvaluator","timestamp":1493739648126,"sparkVersion":"2.0.2","uid":"binEval_e78f1ae03d40","paramMap":{"rawPredictionCol":"rawPrediction","metricName":"areaUnderROC","labelCol":"label"}}
+{"class":"org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator","timestamp":1746807593141,"sparkVersion":"2.2.0","uid":"mcEval_87af8369b788","paramMap":{"labelCol":"label","metricName":"accuracy","predictionCol":"prediction"}}

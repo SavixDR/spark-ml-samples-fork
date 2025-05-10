@@ -14,21 +14,28 @@ configurations.all {
 }
 
 dependencies {
-    compile project(':spark-distributed-library')
+    implementation project(':spark-distributed-library')
 
-    compile("org.springframework:spring-beans:$springFrameworkVersion")
-    compile("org.springframework:spring-context:$springFrameworkVersion")
+    implementation "org.springframework:spring-beans:$springFrameworkVersion"
+    implementation "org.springframework:spring-context:$springFrameworkVersion"
 
-    compile("org.apache.spark:spark-core_$apacheSparkScalaVersion:$apacheSparkVersion")
-    compile("org.apache.spark:spark-sql_$apacheSparkScalaVersion:$apacheSparkVersion")
-    compile("org.apache.spark:spark-mllib_$apacheSparkScalaVersion:$apacheSparkVersion")
+    implementation "org.apache.spark:spark-core_$apacheSparkScalaVersion:$apacheSparkVersion"
+    implementation "org.apache.spark:spark-sql_$apacheSparkScalaVersion:$apacheSparkVersion"
+    implementation "org.apache.spark:spark-mllib_$apacheSparkScalaVersion:$apacheSparkVersion"
 
-    compile("org.slf4j:slf4j-api:$slf4jVersion")
-    compile("ch.qos.logback:logback-classic:$logbackVersion")
-    compile("org.slf4j:log4j-over-slf4j:$slf4jVersion")
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
+    implementation "org.slf4j:log4j-over-slf4j:$slf4jVersion"
 
-    testCompile("org.springframework:spring-test:$springFrameworkVersion")
-    testCompile("junit:junit:$junitVersion")
+    implementation "org.springframework.boot:spring-boot-starter:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
 
-    implementation("org.xerial.snappy:snappy-java:1.1.10.7")
+    testImplementation "org.springframework:spring-test:$springFrameworkVersion"
+    testImplementation "junit:junit:$junitVersion"
+
+    implementation "org.xerial.snappy:snappy-java:1.1.10.7"
+}
+
+sourceSets.main.java {
+    exclude 'com/lohika/morning/ml/spark/driver/service/dou/**'
 }

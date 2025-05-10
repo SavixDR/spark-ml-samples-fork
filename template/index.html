@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Lyrics Genre Classification</title>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				padding: 20px;
+				background: #f7f7f7;
+			}
+			h1 {
+				color: #333;
+			}
+			textarea {
+				width: 100%;
+				font-size: 16px;
+				padding: 10px;
+				margin-bottom: 15px;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+				resize: vertical;
+			}
+			button {
+				padding: 10px 20px;
+				font-size: 16px;
+				background-color: #4caf50;
+				color: white;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+			}
+			button:hover {
+				background-color: #45a049;
+			}
+			#result {
+				margin-top: 20px;
+				font-size: 18px;
+				font-weight: bold;
+			}
+			.chart-container {
+				max-width: 600px;
+				margin-top: 30px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Lyrics Genre Classification</h1>
+
+		<label for="lyrics">Paste your lyrics below:</label><br />
+		<textarea
+			id="lyrics"
+			rows="10"
+			placeholder="Enter lyrics here..."
+		></textarea
+		><br />
+		<button onclick="classifyLyrics()">Classify</button>
+
+		<div id="result"></div>
+
+		<div class="chart-container">
+			<canvas id="genreChart"></canvas>
+		</div>
+
+		<script>
+			const genreLabels = [
+				"Pop",
+				"Country",
+				"Blues",
+				"Jazz",
+				"Reggae",
+				"Rock",
+				"Hip Hop",
+				"Electro",
+			];
+
+      let genreChart = null;
+      window.genreChart = genreChart;
+
+			async function classifyLyrics() {
+				const lyrics = document.getElementById("lyrics").value.trim();
+				if (!lyrics) {
+					alert("Please paste some lyrics.");
+					return;
+				}
+
+				const response = await fetch("http://localhost:9090/lyrics/predict", {
+					method: "POST",
+					headers: { "Content-Type": "text/plain" },
+					body: lyrics,
+				});
+
+				if (!response.ok) {
+					console.error("HTTP error", response.statusText);
+					return;
+				}
+
+				const result = await response.json(); // <-- Parse as JSON
+				console.log("Server JSON response:", result);
+
+				// Extract genre and probability values
+				const predictedGenre = result.genre;
+				const probabilities = [
+          result.popProbability,
+					result.countryProbability,
+					result.bluesProbability,
+					result.jazzProbability,
+					result.reggaeProbability,
+					result.rockProbability,
+					result.hipHopProbability,
+					result.electroProbability,
+				];
+
+				document.getElementById(
+					"result"
+				).textContent = `Predicted Genre: ${predictedGenre}`;
+				drawChart(probabilities);
+			}
+
+			function drawChart(data) {
+				const ctx = document.getElementById("genreChart").getContext("2d");
+
+				if (window.genreChart) window.genreChart.destroy();
+
+				window.genreChart = new Chart(ctx, {
+					type: "pie",
+					data: {
+						labels: genreLabels,
+						datasets: [
+							{
+								data: data,
+								backgroundColor: [
+									"#ff6384",
+									"#36a2eb",
+									"#ffcd56",
+									"#4bc0c0",
+									"#9966ff",
+									"#ff9f40",
+									"#c9cbcf",
+									"#5bc85b",
+								],
+							},
+						],
+					},
+					options: {
+						responsive: true,
+						plugins: {
+							legend: { position: "bottom" },
+							title: {
+								display: true,
+								text: "Genre Prediction Probability (%)",
+							},
+							tooltip: {
+								callbacks: {
+									label: function (context) {
+										return `${context.label}: ${parseFloat(context.raw).toFixed(
+											4
+										)}`;
+									},
+								},
+							},
+						},
+					},
+				});
+			}
+		</script>
+	</body>
+</html>
